@@ -1,0 +1,10 @@
+# 低容量套利扫描器 —— 依赖
+# akshare 接口变动较频繁，装新版即可；若某个接口报 KeyError，先 pip install -U akshare
+akshare>=1.12.0
+pandas>=1.5.0
+lxml>=4.9.0          # fund_etf_fund_daily_em 走 pd.read_html，缺了会报 ImportError
+PyYAML>=6.0
+
+# 可选：只有 `diag_redeem.py --fetch N`（抓公告正文试解析）用得到。
+# 不装的话探针会跳过那一段并说明，其余部分照跑。
+# requests>=2.28

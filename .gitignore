@@ -1,0 +1,43 @@
+# ============ Python ============
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# ============ 本项目产物 ============
+# 报告是每天跑出来的产物，不是源码。
+# 更重要的是：它的内容是第三方行情数据的再加工，不适合随仓库分发。
+# 想给读者看一眼输出长什么样，用 --mock 生成一份放 docs/sample_report.md（手工维护）。
+reports/
+
+# utils.py:82  CACHE_DIR = 项目根/.cache —— 当日接口缓存，纯本地
+.cache/
+
+# daily_run.ps1:42  $LogDir = 项目根/logs —— 无人值守跑批的月度日志。
+# **这一行和上面 reports/ 是同一个理由，而且更隐蔽**：Invoke-Logged 把 run.py 和
+# notify.py 的完整 stdout 逐行抄进 logs\autorun_YYYYMM.log，也就是**实盘报告全文**
+# （真实标的 + config.yaml 里的真实本金）。reports/ 是你会想起来的，logs/ 是脚本
+# 自己建的、你从没打开过的那个。
+logs/
+
+# ============ 密钥相关 —— 这几行是最要紧的 ============
+# notify.py 的 SC_SENDKEY / SMTP_PASS / BARK_URL / FEISHU_WEBHOOK 等一律走环境变量，
+# 任何形式的落盘文件都不入库。
+.env
+.env.*
+*.env
+secrets.*
+
+# 本机私有覆盖配置（若你按手册启用了 config.local.yaml 这条路）
+config.local.yaml
+
+# ============ 编辑器 / 系统 ============
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

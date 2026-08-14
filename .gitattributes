@@ -1,0 +1,26 @@
+# 你在 Windows 上开发、CI 在 Linux 上跑，换行符必须显式钉死，
+# 否则会出现两个具体故障：
+#   1) check.sh 若带上 CRLF，Linux 下报 `/usr/bin/env: 'bash\r': No such file or directory`
+#   2) daily_run.ps1 若被转成 LF，老版本 PowerShell ISE 里显示错行
+# 默认：让 git 自己判断文本/二进制，入库一律 LF
+* text=auto eol=lf
+
+# 必须 LF（要在 Linux/CI 上执行）
+*.sh        text eol=lf
+*.py        text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+
+# 必须 CRLF（Windows 侧执行/查看）
+*.ps1       text eol=crlf
+*.bat       text eol=crlf
+*.cmd       text eol=crlf
+
+# 探针原始输出保持原样，别让 git 改动它——那些文件是"措辞出处"，改一个字节都不好
+probe*.txt  -text
+docs/probes/*.txt -text
+
+# 语言统计：让 GitHub 右上角的语言条只算真正的源码，
+# 不把探针输出和报告样例算成 Python/HTML
+docs/**      linguist-documentation
+*.md         linguist-documentation

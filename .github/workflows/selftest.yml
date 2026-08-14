@@ -1,0 +1,54 @@
+# cb_scanner 离线自检 —— 直接复用仓库里的 check.sh（七项 DoD）
+#
+# 为什么值得配：这个项目唯一拦得住行为退化的东西就是那七项，
+# 而它们全都不联网、跑一次三分钟以内。配上之后，别人给你提 PR 时你不用手动跑。
+#
+# 已知会红的两种情况，先看清楚再改代码：
+#   1) akshare 发新版改了 import 路径 → selftest 在 import 阶段就挂，
+#      与本仓库的逻辑无关。先本地 `pip install -U akshare` 复现。
+#   2) mock 数据用的是 date.today()（STATE.md 里记着的待办），
+#      跨月/跨年的边界日 run.py --mock 可能命中不到 —— 这是已知不足，不是 CI 坏了。
+
+name: selftest
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:      # 允许在 Actions 页面手动点一次
+
+jobs:
+  offline-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ "3.11", "3.12" ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 装 Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: 装依赖
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+
+      - name: 七项离线 DoD（check.sh）
+        run: bash check.sh
+
+      - name: 失败时把报告捞出来看
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-py${{ matrix.python-version }}
+          path: reports/
+          if-no-files-found: ignore
+          retention-days: 7
